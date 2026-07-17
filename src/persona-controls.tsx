@@ -380,13 +380,21 @@ function OverflowMenu(props: {
   onChange: (control: Control, value: string | null) => void;
 }): JSX.Element {
   const { controls, anchor, onClose, onChange } = props;
+  // The overflow menu renders every overflowed control's options in one list,
+  // so containment is decided by their combined option count.
+  const virtualize = shouldVirtualizeOptions(
+    controls.reduce((n, c) => n + c.options.length, 0)
+  );
+  const anchorProps = virtualize
+    ? {
+        ...menuAnchorProps,
+        PaperProps: {
+          className: `${MENU_CLASS}-paper ${MENU_CLASS}-paper-virtualized`
+        }
+      }
+    : menuAnchorProps;
   return (
-    <Menu
-      anchorEl={anchor}
-      open={!!anchor}
-      onClose={onClose}
-      {...menuAnchorProps}
-    >
+    <Menu anchorEl={anchor} open={!!anchor} onClose={onClose} {...anchorProps}>
       {controls.flatMap(control => [
         <ListSubheader
           key={`${control.id}-label`}
